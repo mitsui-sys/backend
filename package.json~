@@ -1,0 +1,14 @@
+{
+  "name": "PortableWebApp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "mitsui-h",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.3.1",
+    "vue": "^2.6.14",
+    "vuetify": "^2.5.10",
+    "webpack": "^5.60.0"
+  }
+}

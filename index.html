@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>socket.io chat</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <!-- <script>
+			alert("JavaScriptで文字列が文字化けする理由");
+		</script> -->
+  </head>
+  <body>
+    <div>
+      <h1>Socket IOを使って見よう</h1>
+      <ul id="messages"></ul>
+      <form id="send_msg" action="#">
+        <input id="input_msg" autocomplete="off" /><button>Send</button>
+      </form>
+    </div>
+    <div>
+      <h1>PostgreSQL接続</h1>
+    </div>
+    <div>
+      <h1>設定</h1>
+      <form method="post" action="/init">
+        <input type="text" name="host" placeholder="localhost" value="" />
+        <input type="number" name="port" placeholder="port" value="5432" />
+        <input
+          type="text"
+          name="database"
+          placeholder="database"
+          value="test"
+        />
+        <input type="text" name="user" placeholder="user" value="postgres" />
+        <input
+          type="text"
+          name="passwd"
+          placeholder="password"
+          value="postgres"
+        />
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+    <div>
+      <h1>表示</h1>
+      <form method="post" action="/select">
+        <input
+          type="text"
+          name="tblName"
+          placeholder="table name"
+          value="member"
+        />
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+    <div>
+      <h1>挿入</h1>
+      <form action="/file" enctype="multipart/form-data" method="post">
+        <div class="form-group">
+          <input type="file" class="form-control-file" name="uploaded_file" />
+          <input type="submit" value="送信" class="btn btn-default" />
+        </div>
+      </form>
+    </div>
+    <script>
+      var socketio = io();
+      $(function () {
+        $("#send_msg").submit(function () {
+          socketio.emit("message", $("#input_msg").val());
+          $("#input_msg").val("");
+          return false;
+        });
+        socketio.on("message", function (msg) {
+          $("#messages").append($("<li>").text(msg));
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "mitsui-h",
+  "license": "MIT",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "start": "node.exe app.js",
+    "test": "gulp",
+    "install-service": "winser -i -a",
+    "uninstall-service": "winser -r -x"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "fs": "^0.0.1-security",
+    "fs-extra": "^10.0.0",
+    "knex": "^0.95.14",
+    "log4js": "^6.3.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.3",
+    "path": "^0.12.7",
+    "pg": "^8.7.1",
+    "sequelize": "^6.9.0",
+    "socket.io": "^4.3.1",
+    "vue": "^2.6.14",
+    "vuetify": "^2.5.10",
+    "webpack": "^5.60.0",
+    "winser": "^1.0.3"
+  }
+}
