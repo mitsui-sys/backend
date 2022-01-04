@@ -1,7 +1,28 @@
 const { pool, dbConf, initilize } = require("./db.index"); //DB設定
 
+const isNum = (val) => {
+  return !isNaN(val);
+};
+
 const typeData = (data) => {
-  return typeof data === "string" ? `'${data}'` : data;
+  // return typeof data === "string" ? `'${data}'` : data;
+  return !isNum(data) ? `'${data}'` : data;
+};
+
+const getCurrentFiles = (req, res) => {
+  const glob = require("glob");
+
+  glob("*", (err, files) => {
+    files.forEach((file) => {
+      console.log(file);
+    });
+    res.status(200);
+    res.end(files);
+  }).catch((err) => {
+    // error
+    res.status(500);
+    res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+  });
 };
 
 const getFile = (req, res) => {
@@ -49,9 +70,13 @@ const registerFile = (req, res) => {
   const param = req.params;
   const query = req.query;
   const body = req.body;
+  const file = req.file;
+  const formData = req.FormData;
   console.log(param);
   console.log(query);
   console.log(body);
+  console.log(file);
+  console.log(formData);
 
   let name = param.name;
   let data = body.data;
@@ -499,4 +524,5 @@ module.exports = {
   registerUser,
   getFile,
   registerFile,
+  getCurrentFiles,
 };

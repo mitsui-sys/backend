@@ -197,10 +197,20 @@ router.get("/system/search/:user", (req, res) => {
   db.getSearch(req, res);
 });
 
-router.post("/system/file", (req, res) => {
-  console.log("Get Search List");
-  db.registerFile;
-  req, res;
+router.get("/system/file", (req, res) => {
+  console.log("Get File List");
+  db.getFile(req.res);
+});
+
+router.post("/system/file/register", (req, res) => {
+  console.log("Register File");
+  console.log(req);
+  db.registerFile(req, res);
+});
+
+router.get("/system/current", (req, res) => {
+  console.log("Current File");
+  db.getCurrentFiles(req, res);
 });
 
 module.exports = router;
