@@ -4,6 +4,25 @@ const logger = require("morgan");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 
+// const log4js = require("log4js");
+
+// log4js.configure({
+//   appenders: {
+//     system: { type: "file", filename: "./logs/system.log" },
+//   },
+//   categories: {
+//     default: { appenders: ["system"], level: "debug" },
+//   },
+// });
+// const logger = log4js.getLogger("cheese");
+
+// logger.trace("trace msg");
+// logger.debug("debug msg");
+// logger.info("info msg");
+// logger.warn("warn msg");
+// logger.error("error msg");
+// logger.fatal("fatal msg");
+
 var indexRouter = require("./routes/index");
 var app = express();
 var http = require("http").Server(app);

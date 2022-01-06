@@ -213,4 +213,14 @@ router.get("/system/current", (req, res) => {
   db.getCurrentFiles(req, res);
 });
 
+router.get("/system/log", (req, res) => {
+  console.log("Get File");
+  db.getLog(req, res);
+});
+
+router.post("/system/log/register", (req, res) => {
+  console.log("Register Log");
+  db.registerLog(req, res);
+});
+
 module.exports = router;

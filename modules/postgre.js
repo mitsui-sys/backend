@@ -25,6 +25,76 @@ const getCurrentFiles = (req, res) => {
   });
 };
 
+const getLog = (req, res) => {
+  req.params.name = "tbl_008_log";
+  const param = req.params;
+  const query = req.query;
+  const body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  const tblName = param.name;
+  const sql = `SELECT * FROM ${tblName}`;
+  console.log(sql);
+  pool[1]
+    .query(sql)
+    .then((result) => {
+      // success
+      let response = {};
+      // fieldsから列名, _types._types.builtinsからデータ型を得る
+      const fields = result.fields;
+      const types = result._types._types.builtins;
+      const columns = [];
+      fields.forEach((f) => {
+        const dt = Object.keys(types).reduce((r, key) => {
+          return types[key] === f.dataTypeID ? key : r;
+        }, null);
+        columns.push({ columnName: f.name, type: dt });
+      });
+      // レスポンスに列情報を設定する
+      response.columns = columns;
+      // レスポンスにサンプルデータを設定する
+      response.rows = result.rows;
+      // success
+      res.status(200).json(response);
+    })
+    .catch((error) => {
+      // error
+      res.status(500);
+      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+    });
+};
+
+const registerLog = (req, res) => {
+  req.params.name = "tbl_008_log";
+  const param = req.params;
+  const query = req.query;
+  const body = req.body;
+
+  console.log(param);
+  console.log(query);
+  console.log(body);
+
+  const name = param.name;
+  const data = body.data;
+  const columns = Object.keys(data);
+  const col = "(" + columns.join(",") + ")";
+  const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+  let queryStr = `INSERT INTO ${name} ${col} VALUES ${row} RETURNING *`;
+  console.log(queryStr);
+  pool[1]
+    .query(queryStr)
+    // pool[0].query(queryStr, data)
+    .then((results) => {
+      res.status(201).json(results.rows);
+    })
+    .catch((error) => {
+      // error
+      res.status(500);
+      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+    });
+};
+
 const getFile = (req, res) => {
   req.params.name = "tbl_007_file";
   const param = req.params;
@@ -404,7 +474,24 @@ const get = (req, res) => {
     .query(sql)
     .then((result) => {
       // success
-      res.status(200).json(result.rows);
+      // success
+      let response = {};
+      // fieldsから列名, _types._types.builtinsからデータ型を得る
+      const fields = result.fields;
+      const types = result._types._types.builtins;
+      const columns = [];
+      fields.forEach((f) => {
+        const dt = Object.keys(types).reduce((r, key) => {
+          return types[key] === f.dataTypeID ? key : r;
+        }, null);
+        columns.push({ columnName: f.name, type: dt });
+      });
+      // レスポンスに列情報を設定する
+      response.columns = columns;
+      // レスポンスにサンプルデータを設定する
+      response.rows = result.rows;
+      // success
+      res.status(200).json(response);
     })
     .catch((error) => {
       // error
@@ -525,4 +612,6 @@ module.exports = {
   getFile,
   registerFile,
   getCurrentFiles,
+  getLog,
+  registerLog,
 };
