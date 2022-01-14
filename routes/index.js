@@ -17,6 +17,17 @@ const upload = multer({
   }),
 });
 
+const upload1 = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, "uploads/");
+    },
+    filename: function (req, file, cb) {
+      cb(null, new Date().valueOf() + "_" + file.originalname);
+    },
+  }),
+});
+
 let db = require("../modules/postgre");
 let db1 = knex({
   client: "pg",
@@ -87,6 +98,7 @@ router.get("/file/:filename", (req, res) => {
 });
 
 router.post("/file", upload.single("uploaded_file"), (req, res) => {
+  console.log(req);
   console.log(req.file);
   const { filename, mimetype, size } = req.file;
   const filepath = req.file.path;
@@ -112,20 +124,23 @@ router.post("/file", upload.single("uploaded_file"), (req, res) => {
   // res.json('/file api');
 });
 
-// router.get('/hello/:place', function (req, res, next) {
-//     var param = {"result":"Hello "+ req.params.place + " !", "post date":req.query.date};  // <ー追加
-//     res.header('Content-Type', 'application/json; charset=utf-8');
-//     res.send(param);
-//   });
+router.post("/test", (req, res) => {
+  console.log(req);
+  res.send(req);
+});
+
+router.post("/upload", upload1.single("file"), (req, res) => {
+  res.send(req.file.originalname + "ファイルのアップロードが完了しました。");
+});
 
 /*
 データベースAPI
 */
-router.post("/init", function (req, res) {
+router.post("/init", (req, res) => {
   db.init(req, res);
 });
 
-router.post("/create", function (req, res) {
+router.post("/create", (req, res) => {
   db.createTable(req, res);
 });
 router.get("/columns/:name", (req, res) => {
