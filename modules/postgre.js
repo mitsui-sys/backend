@@ -1,5 +1,24 @@
 const { pool, dbConf, initilize } = require("./db.index"); //DB設定
 
+const getResponce = (result) => {
+  let response = {};
+  // fieldsから列名, _types._types.builtinsからデータ型を得る
+  const fields = result.fields;
+  const types = result._types._types.builtins;
+  const columns = [];
+  fields.forEach((f) => {
+    const dt = Object.keys(types).reduce((r, key) => {
+      return types[key] === f.dataTypeID ? key : r;
+    }, null);
+    columns.push({ columnName: f.name, type: dt });
+  });
+  // レスポンスに列情報を設定する
+  response.columns = columns;
+  // レスポンスにサンプルデータを設定する
+  response.rows = result.rows;
+  return response;
+};
+
 const isNum = (val) => {
   return !isNaN(val);
 };
@@ -110,22 +129,7 @@ const getFile = (req, res) => {
     .query(sql)
     .then((result) => {
       // success
-      let response = {};
-      // fieldsから列名, _types._types.builtinsからデータ型を得る
-      const fields = result.fields;
-      const types = result._types._types.builtins;
-      const columns = [];
-      fields.forEach((f) => {
-        const dt = Object.keys(types).reduce((r, key) => {
-          return types[key] === f.dataTypeID ? key : r;
-        }, null);
-        columns.push({ columnName: f.name, type: dt });
-      });
-      // レスポンスに列情報を設定する
-      response.columns = columns;
-      // レスポンスにサンプルデータを設定する
-      response.rows = result.rows;
-      // success
+      const response = getResponce(result);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -190,22 +194,7 @@ const getUser = (req, res) => {
     .query(sql)
     .then((result) => {
       // success
-      let response = {};
-      // fieldsから列名, _types._types.builtinsからデータ型を得る
-      const fields = result.fields;
-      const types = result._types._types.builtins;
-      const columns = [];
-      fields.forEach((f) => {
-        const dt = Object.keys(types).reduce((r, key) => {
-          return types[key] === f.dataTypeID ? key : r;
-        }, null);
-        columns.push({ columnName: f.name, type: dt });
-      });
-      // レスポンスに列情報を設定する
-      response.columns = columns;
-      // レスポンスにサンプルデータを設定する
-      response.rows = result.rows;
-      // success
+      const response = getResponce(result);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -265,22 +254,8 @@ const getSearch = (req, res) => {
     .query(sql)
     // pool[0].query(queryStr, data)
     .then((result) => {
-      let response = {};
-      // fieldsから列名, _types._types.builtinsからデータ型を得る
-      const fields = result.fields;
-      const types = result._types._types.builtins;
-      const columns = [];
-      fields.forEach((f) => {
-        const dt = Object.keys(types).reduce((r, key) => {
-          return types[key] === f.dataTypeID ? key : r;
-        }, null);
-        columns.push({ columnName: f.name, type: dt });
-      });
-      // レスポンスに列情報を設定する
-      response.columns = columns;
-      // レスポンスにサンプルデータを設定する
-      response.rows = result.rows;
       // success
+      const response = getResponce(result);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -354,7 +329,7 @@ const init = (req, res) => {
   console.log(body);
   const id = query.id || 0;
 
-  //設定値からコピー
+  //初期化
   let conf = Object.assign(dbConf[id]);
   for (key in body) {
     conf[key] = body[key];
@@ -371,13 +346,40 @@ const init = (req, res) => {
     .query(sql)
     .then((results) => {
       // success
-      res.status(200).json(results.rows);
+      const response = getResponce(result);
+      res.status(200).json(response);
     })
     .catch((error) => {
       // error
       res.status(500);
       res.end(`Error accessing DB: ${JSON.stringify(error)}`);
     });
+};
+
+const getTables = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[0].tx(async (client) => {
+      const sql =
+        "SELECT tablename FROM pg_tables " +
+        "WHERE schemaname NOT IN('pg_catalog','information_schema') " +
+        "ORDER BY tablename";
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
 };
 
 const createTable = (req, res) => {
@@ -474,23 +476,7 @@ const get = (req, res) => {
     .query(sql)
     .then((result) => {
       // success
-      // success
-      let response = {};
-      // fieldsから列名, _types._types.builtinsからデータ型を得る
-      const fields = result.fields;
-      const types = result._types._types.builtins;
-      const columns = [];
-      fields.forEach((f) => {
-        const dt = Object.keys(types).reduce((r, key) => {
-          return types[key] === f.dataTypeID ? key : r;
-        }, null);
-        columns.push({ columnName: f.name, type: dt });
-      });
-      // レスポンスに列情報を設定する
-      response.columns = columns;
-      // レスポンスにサンプルデータを設定する
-      response.rows = result.rows;
-      // success
+      const response = getResponce(result);
       res.status(200).json(response);
     })
     .catch((error) => {
@@ -598,6 +584,7 @@ const deleteOne = (req, res) => {
 
 module.exports = {
   init,
+  getTables,
   createTable,
   get,
   insertOne,

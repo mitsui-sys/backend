@@ -3,25 +3,7 @@ const cors = require("cors"); // corsポリシーに抵触するため、その�
 const logger = require("morgan");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
-
-// const log4js = require("log4js");
-
-// log4js.configure({
-//   appenders: {
-//     system: { type: "file", filename: "./logs/system.log" },
-//   },
-//   categories: {
-//     default: { appenders: ["system"], level: "debug" },
-//   },
-// });
-// const logger = log4js.getLogger("cheese");
-
-// logger.trace("trace msg");
-// logger.debug("debug msg");
-// logger.info("info msg");
-// logger.warn("warn msg");
-// logger.error("error msg");
-// logger.fatal("fatal msg");
+const path = require("path");
 
 var indexRouter = require("./routes/index");
 var app = express();
@@ -38,7 +20,10 @@ app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
-app.use("/public", express.static("public"));
+// app.use("/public", express.static("public"));
+console.log(path.join(__dirname, "public"));
+app.use("/public", express.static(path.join(__dirname, "public")));
+
 // app.use(express.static('public'));
 // app.use(express.static('files'));
 
@@ -59,23 +44,23 @@ app.use(
 app.use("/", indexRouter);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   res.status(404);
   res.end("Not found! : " + req.path);
 });
 
-app.use(function (err, req, res, next) {
+app.use((err, req, res, next) => {
   res.status(500);
   res.end("my 500 error! : " + err);
 });
 
-io.on("connection", function (socket) {
-  socket.on("message", function (msg) {
+io.on("connection", (socket) => {
+  socket.on("message", (msg) => {
     console.log("message: " + msg);
     io.emit("message", msg);
   });
 });
 
-http.listen(PORT, function () {
+http.listen(PORT, () => {
   console.log("server listening. Port:" + PORT);
 });

@@ -1,32 +1,66 @@
 const express = require("express");
 const knex = require("knex");
 const fs = require("fs");
+const path = require("path");
 const router = express.Router();
+const glob = require("glob");
 
 // 追加 1
 const multer = require("multer");
+const upload_dir = "public/data/uploads";
+const updir = path.dirname(__dirname).replace(/\\/g, "/") + "/public"; // アプリケーションフォルダのサブディレクトリ "./tmp" をアップロード先にしている。
+const upload = multer({ dest: updir });
 // const upload = multer({dest: '/public/data/uploads'});
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "public/data/uploads/");
-    },
-    filename: function (req, file, cb) {
-      cb(null, new Date().valueOf() + "_" + file.originalname);
-    },
-  }),
-});
+// const upload = multer({
+//   storage: multer.diskStorage({
+//     destination: function (req, file, cb) {
+//       let path = "public";
+//       if (req.params.path) path += req.params.path;
+//       cb(null, path);
+//     },
+//     filename: function (req, file, cb) {
+//       //日付を追加
+//       // cb(null, new Date().valueOf() + "_" + file.originalname);
+//       //ファイル名そのまま
+//       cb(null, file.originalname);
+//     },
+//   }),
+// });
 
-const upload1 = multer({
-  storage: multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, "uploads/");
-    },
-    filename: function (req, file, cb) {
-      cb(null, new Date().valueOf() + "_" + file.originalname);
-    },
-  }),
-});
+const sampleDate = (date, format) => {
+  format = format.replace(/YYYY/, date.getFullYear());
+  format = format.replace(/MM/, date.getMonth() + 1);
+  format = format.replace(/DD/, date.getDate());
+
+  return format;
+};
+
+const getFiles = (dirpath, callback) => {
+  const showFiles = (dirpath, callback) => {
+    fs.readdir(dirpath, (err, files) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      for (const file of files) {
+        const fp = path.join(dirpath, file);
+        fs.stat(fp, (err, stats) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          if (stats.isDirectory()) {
+            showFiles(fp, callback);
+          } else {
+            filelist.push(fp);
+            callback(fp);
+          }
+        });
+      }
+    });
+  };
+  showFiles(upload_dir, console.log);
+};
 
 let db = require("../modules/postgre");
 let db1 = knex({
@@ -41,96 +75,47 @@ let db1 = knex({
 });
 
 router.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "." });
+  // res.sendFile("index.html", { root: "." });
   // res.json({ info: 'Node.js, Express, and Postgres API' })
   // res.send('hello world');
 });
 
-router.get("/file", (req, res) => {
-  db1
-    .select("*")
-    .from("files")
-    .then((files) => {
-      console.log(files);
-      for (let key in files) {
-        let file = files[key];
-        console.log(file.filename);
-        if (file.blob != null) {
-          console.log("writing...");
-          fs.writeFileSync(file.name, file.blob);
-        }
-      }
-      res.json(200, { success: true });
-      // console.log(files)
-    })
-    .catch((err) =>
-      res.status(404).json({
-        success: false,
-        message: "not found",
-        stack: err.stack,
-      })
-    );
+router.get("/upload/directory", (req, res) => {
+  //ファイルとディレクトリのリストが格納される(配列)
+  const dirList = glob.sync("public/*/");
+  res.status(200).json({ dirs: dirList });
 });
 
-router.get("/file/:filename", (req, res) => {
-  const { filename } = req.params;
-  console.log(filename);
-  db1
-    .select("*")
-    .from("files")
-    .where({ filename })
-    .then((images) => {
-      if (images[0]) {
-        const dirname = path.resolve();
-        const fullfilepath = path.join(dirname, images[0].filepath);
-
-        return res.type(images[0].mimetype).sendFile(fullfilepath);
-      }
-      return Promise.reject(new Error("Image does not exist"));
-    })
-    .catch((err) =>
-      res.status(404).json({
-        success: false,
-        message: "not found",
-        stack: err.stack,
-      })
-    );
+router.get("/upload", (req, res) => {
+  fs.readdir(upload_dir, (err, files) => {
+    let filelist = [];
+    if (err) {
+      console.error(err);
+      return;
+    }
+    for (const file of files) {
+      let test = {};
+      const fp = path.join(upload_dir, file);
+      test["name"] = file;
+      test["title"] = file;
+      test["subtitle"] = sampleDate(new Date(), "YYYY年MM月DD日");
+      test["path"] = fp;
+      test["color"] = "amber";
+      test["icon"] = "mdi-clipboard-text";
+      filelist.push(test);
+    }
+    const result = { files: filelist };
+    res.status(200).json(result);
+  });
 });
 
-router.post("/file", upload.single("uploaded_file"), (req, res) => {
-  console.log(req);
-  console.log(req.file);
+router.post("/upload", upload.single("uploaded_file"), (req, res) => {
   const { filename, mimetype, size } = req.file;
   const filepath = req.file.path;
   const blob = [fs.readFileSync(filepath, { encoding: "hex" })];
   console.log(filename, filepath, mimetype, size);
-  db1
-    .insert({
-      filename,
-      filepath,
-      mimetype,
-      size,
-      blob,
-    })
-    .into("files")
-    .then(() => res.json({ success: true, filename }))
-    .catch((err) =>
-      res.json({
-        success: false,
-        message: "upload failed",
-        stack: err.stack,
-      })
-    );
-  // res.json('/file api');
-});
-
-router.post("/test", (req, res) => {
-  console.log(req);
-  res.send(req);
-});
-
-router.post("/upload", upload1.single("file"), (req, res) => {
-  res.send(req.file.originalname + "ファイルのアップロードが完了しました。");
+  const result = { file: req.file.originalname, upload: "success" };
+  res.status(200).json(result);
 });
 
 /*
@@ -139,7 +124,9 @@ router.post("/upload", upload1.single("file"), (req, res) => {
 router.post("/init", (req, res) => {
   db.init(req, res);
 });
-
+router.get("/table", (req, res) => {
+  db.getTables(req, res);
+});
 router.post("/create", (req, res) => {
   db.createTable(req, res);
 });
