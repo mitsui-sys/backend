@@ -28,6 +28,117 @@ const typeData = (data) => {
   return !isNum(data) ? `'${data}'` : data;
 };
 
+const getDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  const table = "tbl_009_display";
+  try {
+    const result = await pool[0].tx(async (client) => {
+      const sql = `SELECT * FROM ${table}`;
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const registerDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  const data = body.data;
+
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_009_display";
+      const columns = Object.keys(data);
+      const col = "(" + columns.join(",") + ")";
+      const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+      const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const updateDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[0].tx(async (client) => {
+      const table = "tbl_009_display";
+      const key = body.data.key;
+      const id = body.data.id;
+      const update = body.data.update;
+      let rows = [];
+      for (const key in update) {
+        rows.push(`${key}=${typeData(update[key])}`);
+      }
+      const row = rows.join(",");
+      const sql = `UPDATE ${table} SET ${row} WHERE ${key} = ${id} RETURNING *`;
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const deleteDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[0].tx(async (client) => {
+      const sql =
+        "SELECT tablename FROM pg_tables " +
+        "WHERE schemaname NOT IN('pg_catalog','information_schema') " +
+        "ORDER BY tablename";
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
 const getCurrentFiles = (req, res) => {
   const glob = require("glob");
 
@@ -601,4 +712,8 @@ module.exports = {
   getCurrentFiles,
   getLog,
   registerLog,
+  getDisplay,
+  registerDisplay,
+  updateDisplay,
+  deleteDisplay,
 };

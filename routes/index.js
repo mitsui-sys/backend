@@ -225,4 +225,22 @@ router.post("/system/log/register", (req, res) => {
   db.registerLog(req, res);
 });
 
+//表示情報の設定
+router.get("/display/:table", (req, res) => {
+  console.log("SELECT display");
+  db.getDisplay(req, res);
+});
+router.post("/display/:table", (req, res) => {
+  console.log("INSERT DISPLAY");
+  db.registerDisplay(req, res);
+});
+router.put("/display/:table", (req, res) => {
+  console.log("UPDATE DISPLAY");
+  db.updateDisplay(req, res);
+});
+router.delete("/display/:table", (req, res) => {
+  console.log("DELETE DISPLAY");
+  db.deleteDisplay(req, res);
+});
+
 module.exports = router;
