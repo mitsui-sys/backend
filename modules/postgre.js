@@ -52,10 +52,10 @@ const getDocumentData = async (req, res) => {
 
   try {
     const result = await pool[1].tx(async (client) => {
-      const tableName = "tbl_010_document";
+      const table = "tbl_010_document";
       const name = params.table === undefined ? "" : typeData(params.table);
       const cond = name == "" ? "" : `AND name = ${name}`;
-      const sql = `SELECT * FROM ${tableName} WHERE 1=1 ${cond}`;
+      const sql = `SELECT * FROM ${table} WHERE 1=1 ${cond}`;
       console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
@@ -86,6 +86,7 @@ const registerDocumentData = async (req, res) => {
       const col = "(" + columns.join(",") + ")";
       const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
       const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -114,7 +115,7 @@ const updateDocumentData = async (req, res) => {
       const cond = joinData(key);
       const row = joinData(update);
       const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
-      // console.log(sql);
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -141,6 +142,7 @@ const deleteDocumentData = async (req, res) => {
       const key = body.data.key;
       const cond = joinData(key, " AND ");
       const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -199,6 +201,7 @@ const registerDisplay = async (req, res) => {
       const col = "(" + columns.join(",") + ")";
       const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
       const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -227,7 +230,7 @@ const updateDisplay = async (req, res) => {
       const cond = joinData(key);
       const row = joinData(update);
       const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
-      // console.log(sql);
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -254,6 +257,7 @@ const deleteDisplay = async (req, res) => {
       const key = body.data.key;
       const cond = joinData(key, " AND ");
       const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂

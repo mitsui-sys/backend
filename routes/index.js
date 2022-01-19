@@ -9,23 +9,22 @@ const glob = require("glob");
 const multer = require("multer");
 const upload_dir = "public";
 // const updir = path.dirname(__dirname).replace(/\\/g, "/") + "/public"; // アプリケーションフォルダのサブディレクトリ "./tmp" をアップロード先にしている。
-const upload = multer({ dest: upload_dir });
+// const upload = multer({ dest: upload_dir });
 // const upload = multer({dest: '/public/data/uploads'});
-// const upload = multer({
-//   storage: multer.diskStorage({
-//     destination: function (req, file, cb) {
-//       let path = "public";
-//       if (req.params.path) path += req.params.path;
-//       cb(null, path);
-//     },
-//     filename: function (req, file, cb) {
-//       //日付を追加
-//       // cb(null, new Date().valueOf() + "_" + file.originalname);
-//       //ファイル名そのまま
-//       cb(null, file.originalname);
-//     },
-//   }),
-// });
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      let path = "public";
+      cb(null, path);
+    },
+    filename: function (req, file, cb) {
+      //日付を追加
+      // cb(null, new Date().valueOf() + "_" + file.originalname);
+      //ファイル名そのまま
+      cb(null, file.originalname);
+    },
+  }),
+});
 
 const sampleDate = (date, format) => {
   format = format.replace(/YYYY/, date.getFullYear());
@@ -234,15 +233,15 @@ router.get("/display/:table", (req, res) => {
   console.log("SELECT display");
   db.getDisplay(req, res);
 });
-router.post("/display/:table", (req, res) => {
+router.post("/display", (req, res) => {
   console.log("INSERT DISPLAY");
   db.registerDisplay(req, res);
 });
-router.put("/display/:table", (req, res) => {
+router.put("/display", (req, res) => {
   console.log("UPDATE DISPLAY");
   db.updateDisplay(req, res);
 });
-router.delete("/display/:table", (req, res) => {
+router.delete("/display", (req, res) => {
   console.log("DELETE DISPLAY");
   db.deleteDisplay(req, res);
 });
@@ -256,15 +255,15 @@ router.get("/document/:table", (req, res) => {
   console.log("SELECT display");
   db.getDocumentData(req, res);
 });
-router.post("/document/:table", (req, res) => {
+router.post("/document", (req, res) => {
   console.log("INSERT DISPLAY");
   db.registerDocumentData(req, res);
 });
-router.put("/document/:table", (req, res) => {
+router.put("/document", (req, res) => {
   console.log("UPDATE DISPLAY");
   db.updateDocumentData(req, res);
 });
-router.delete("/document/:table", (req, res) => {
+router.delete("/document", (req, res) => {
   console.log("DELETE DISPLAY");
   db.deleteDocumentData(req, res);
 });
