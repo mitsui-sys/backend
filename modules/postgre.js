@@ -28,17 +28,148 @@ const typeData = (data) => {
   return !isNum(data) ? `'${data}'` : data;
 };
 
-const getDisplay = async (req, res) => {
+/**
+ * 連想配列を文字列に１つにまとめる
+ * @param {*} data 連想配列
+ * @returns 結合した値
+ */
+const joinData = (data, separator = ",") => {
+  let items = [];
+  for (const x in data) {
+    items.push(`${x}=${typeData(data[x])}`);
+  }
+  return items.join(separator);
+};
+
+//調査票を取得する
+const getDocumentData = async (req, res) => {
+  const params = req.params;
+  const query = req.query;
+  const body = req.body;
+  console.log(params);
+  console.log(query);
+  console.log(body);
+
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const tableName = "tbl_010_document";
+      const name = params.table === undefined ? "" : typeData(params.table);
+      const cond = name == "" ? "" : `AND name = ${name}`;
+      const sql = `SELECT * FROM ${tableName} WHERE 1=1 ${cond}`;
+      console.log(sql);
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const registerDocumentData = async (req, res) => {
   let param = req.params;
   let query = req.query;
   let body = req.body;
   console.log(param);
   console.log(query);
   console.log(body);
-  const table = "tbl_009_display";
+  const data = body.data;
+
   try {
-    const result = await pool[0].tx(async (client) => {
-      const sql = `SELECT * FROM ${table}`;
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_010_document";
+      const columns = Object.keys(data);
+      const col = "(" + columns.join(",") + ")";
+      const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+      const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const updateDocumentData = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_010_document";
+      const key = body.data.key;
+      const update = body.data.update;
+      const cond = joinData(key);
+      const row = joinData(update);
+      const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
+      // console.log(sql);
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const deleteDocumentData = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_010_document";
+      const key = body.data.key;
+      const cond = joinData(key, " AND ");
+      const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+//表示設定を取得する
+const getDisplay = async (req, res) => {
+  const params = req.params;
+  const query = req.query;
+  const body = req.body;
+  console.log(params);
+  console.log(query);
+  console.log(body);
+
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const tableName = "tbl_009_display";
+      const name = params.table === undefined ? "" : typeData(params.table);
+      const cond = name == "" ? "" : `AND name = ${name}`;
+      const sql = `SELECT * FROM ${tableName} WHERE 1=1 ${cond}`;
+      console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -89,17 +220,14 @@ const updateDisplay = async (req, res) => {
   console.log(query);
   console.log(body);
   try {
-    const result = await pool[0].tx(async (client) => {
+    const result = await pool[1].tx(async (client) => {
       const table = "tbl_009_display";
       const key = body.data.key;
-      const id = body.data.id;
       const update = body.data.update;
-      let rows = [];
-      for (const key in update) {
-        rows.push(`${key}=${typeData(update[key])}`);
-      }
-      const row = rows.join(",");
-      const sql = `UPDATE ${table} SET ${row} WHERE ${key} = ${id} RETURNING *`;
+      const cond = joinData(key);
+      const row = joinData(update);
+      const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
+      // console.log(sql);
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -121,11 +249,11 @@ const deleteDisplay = async (req, res) => {
   console.log(query);
   console.log(body);
   try {
-    const result = await pool[0].tx(async (client) => {
-      const sql =
-        "SELECT tablename FROM pg_tables " +
-        "WHERE schemaname NOT IN('pg_catalog','information_schema') " +
-        "ORDER BY tablename";
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_009_display";
+      const key = body.data.key;
+      const cond = joinData(key, " AND ");
+      const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -716,4 +844,8 @@ module.exports = {
   registerDisplay,
   updateDisplay,
   deleteDisplay,
+  getDocumentData,
+  registerDocumentData,
+  updateDocumentData,
+  deleteDocumentData,
 };

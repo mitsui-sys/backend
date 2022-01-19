@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors"); // corsポリシーに抵触するため、その対策としてcorsを利用する
 const logger = require("morgan");
 const cookieParser = require("cookie-parser");
-const session = require("express-session");
+// const session = require("express-session");
 const path = require("path");
 
 var indexRouter = require("./routes/index");
@@ -24,22 +24,19 @@ app.use(cookieParser());
 console.log(path.join(__dirname, "public"));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
-// app.use(express.static('public'));
-// app.use(express.static('files'));
-
 //セッション情報
-app.use(
-  session({
-    secret: "secret",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: false,
-      maxage: 1000 * 60 * 1, //タイムアウト1分
-    },
-  })
-);
+// app.use(
+//   session({
+//     secret: "secret",
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       httpOnly: true,
+//       secure: false,
+//       maxage: 1000 * 60 * 1, //タイムアウト1分
+//     },
+//   })
+// );
 
 app.use("/", indexRouter);
 

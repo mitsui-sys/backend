@@ -7,9 +7,9 @@ const glob = require("glob");
 
 // 追加 1
 const multer = require("multer");
-const upload_dir = "public/data/uploads";
-const updir = path.dirname(__dirname).replace(/\\/g, "/") + "/public"; // アプリケーションフォルダのサブディレクトリ "./tmp" をアップロード先にしている。
-const upload = multer({ dest: updir });
+const upload_dir = "public";
+// const updir = path.dirname(__dirname).replace(/\\/g, "/") + "/public"; // アプリケーションフォルダのサブディレクトリ "./tmp" をアップロード先にしている。
+const upload = multer({ dest: upload_dir });
 // const upload = multer({dest: '/public/data/uploads'});
 // const upload = multer({
 //   storage: multer.diskStorage({
@@ -226,6 +226,10 @@ router.post("/system/log/register", (req, res) => {
 });
 
 //表示情報の設定
+router.get("/display", (req, res) => {
+  console.log("SELECT display");
+  db.getDisplay(req, res);
+});
 router.get("/display/:table", (req, res) => {
   console.log("SELECT display");
   db.getDisplay(req, res);
@@ -241,6 +245,28 @@ router.put("/display/:table", (req, res) => {
 router.delete("/display/:table", (req, res) => {
   console.log("DELETE DISPLAY");
   db.deleteDisplay(req, res);
+});
+
+//表示情報の設定
+router.get("/document", (req, res) => {
+  console.log("SELECT display");
+  db.getDocumentData(req, res);
+});
+router.get("/document/:table", (req, res) => {
+  console.log("SELECT display");
+  db.getDocumentData(req, res);
+});
+router.post("/document/:table", (req, res) => {
+  console.log("INSERT DISPLAY");
+  db.registerDocumentData(req, res);
+});
+router.put("/document/:table", (req, res) => {
+  console.log("UPDATE DISPLAY");
+  db.updateDocumentData(req, res);
+});
+router.delete("/document/:table", (req, res) => {
+  console.log("DELETE DISPLAY");
+  db.deleteDocumentData(req, res);
 });
 
 module.exports = router;
