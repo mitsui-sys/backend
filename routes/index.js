@@ -79,33 +79,142 @@ router.get("/", (req, res) => {
   // res.send('hello world');
 });
 
+router.get("/upload/test", (req, res) => {
+  //ファイルとディレクトリのリストが格納される(配列)
+  const path = req.query.path || "*";
+  const allList = glob.sync(path);
+  const result = {
+    data: { test: allList },
+  };
+  res.status(200).json(result);
+});
+
 router.get("/upload/directory", (req, res) => {
   //ファイルとディレクトリのリストが格納される(配列)
-  const dirList = glob.sync("public/*/");
-  res.status(200).json({ dirs: dirList });
+  const dirList = glob.sync("public/**/");
+  const result = {
+    data: { dir: dirList },
+  };
+  res.status(200).json(result);
+});
+
+router.get("/upload/file", (req, res) => {
+  const fileList = glob.sync("public/**", { nodir: true });
+  const result = {
+    data: { file: fileList },
+  };
+  res.status(200).json(result);
+});
+
+router.get("/upload/detail", (req, res) => {
+  //ファイルとディレクトリのリストが格納される(配列)
+  const statList = new glob.Glob(path, { sync: true, stat: true });
+  const result = {
+    data: { detail: statList },
+  };
+  res.status(200).json(result);
 });
 
 router.get("/upload", (req, res) => {
-  fs.readdir(upload_dir, (err, files) => {
-    let filelist = [];
-    if (err) {
-      console.error(err);
-      return;
+  // fs.readdir(upload_dir, (err, files) => {
+  //   let fileList = [];
+  //   if (err) {
+  //     console.error(err);
+  //     return;
+  //   }
+  //   for (const file of files) {
+  //     let test = {};
+  //     const fp = path.join(upload_dir, file);
+  //     //     // fs.stat(fp, (err, stats) => {
+  //     //     //   if (err) {
+  //     //     //     console.error(err);
+  //     //     //     return;
+  //     //     //   }
+  //     //     //   if (stats.isDirectory()) {
+  //     //     //     showFiles(fp, callback);
+  //     //     //   } else {
+  //     //     //     callback(fp);
+  //     //     //   }
+  //     //     // });
+  //     test["name"] = file;
+  //     test["title"] = file;
+  //     test["subtitle"] = sampleDate(new Date(), "YYYY年MM月DD日");
+  //     test["path"] = fp;
+  //     test["color"] = "amber";
+  //     test["icon"] = "mdi-clipboard-text";
+  //     fileList.push(test);
+  //   }
+  //   const result = { files: fileList };
+  //   res.status(200).json(result);
+  // });
+
+  const dirList = glob.sync("public/**/");
+  const fileList = glob.sync("public/**", { nodir: true });
+  let dList = [];
+  for (const i in dirList) {
+    let test = {};
+    const path = dirList[i];
+    const name = path.split("/").reverse().slice(1).reverse().join("/");
+    const filename = path.split("/").reverse()[0].split(".")[0];
+    const extend = path.split("/").reverse()[0].split(".")[1];
+    test["name"] = name;
+    test["title"] = filename;
+    test["path"] = path;
+    test["date"] = sampleDate(new Date(), "YYYY年MM月DD日");
+    test["color"] = "amber";
+    test["icon"] = "mdi-folder";
+    dList.push(test);
+  }
+  let fList = [];
+  for (const i in fileList) {
+    let test = {};
+    const path = fileList[i];
+    const name = path.split("/").reverse().slice(1).reverse().join("/");
+    const filename = path.split("/").reverse()[0].split(".")[0];
+    const extend = path.split("/").reverse()[0].split(".")[1];
+    test["name"] = filename + extend;
+    test["title"] = filename + extend;
+    test["path"] = path;
+    test["date"] = sampleDate(new Date(), "YYYY年MM月DD日");
+    test["color"] = "amber";
+    test["icon"] = "mdi-clipboard-text";
+    fList.push(test);
+  }
+  console.log(dList, fList);
+  const result = { dirs: dList, files: fList };
+  res.status(200).json(result);
+});
+
+router.get("/upload/dirent", (req, res) => {
+  const readdirRecursively = async (dir, files = []) => {
+    const dirents = await fsPromises.readdir(dir, { withFileTypes: true });
+    const dirs = [];
+    for (const dirent of dirents) {
+      if (dirent.isDirectory()) dirs.push(`${dir}/${dirent.name}`);
+      if (dirent.isFile()) files.push(`${dir}/${dirent.name}`);
+      // let test = {};
+      // const isDir = dirent.isDirectory();
+      // test["name"] = file;
+      // test["path"] = `${dir}/${dirent.name}`;
+      // test["dir"] = isDir;
+      // test["getdate"] = sampleDate(new Date(), "YYYY年MM月DD日");
+      // test["color"] = isDir ? "amber" : "blue";
+      // test["icon"] = isDir ? "mdi-folder" : "mdi-clipboard-text";
+      // test["dirent"] = dirent;
+      // dirs.push(`${dir}/${dirent.name}`);
     }
-    for (const file of files) {
-      let test = {};
-      const fp = path.join(upload_dir, file);
-      test["name"] = file;
-      test["title"] = file;
-      test["subtitle"] = sampleDate(new Date(), "YYYY年MM月DD日");
-      test["path"] = fp;
-      test["color"] = "amber";
-      test["icon"] = "mdi-clipboard-text";
-      filelist.push(test);
+    for (const d of dirs) {
+      files = await readdirRecursively(d, files);
     }
-    const result = { files: filelist };
-    res.status(200).json(result);
-  });
+    return Promise.resolve(files);
+  };
+  (async () => {
+    const result = await readdirRecursively("public/").catch((err) => {
+      console.error("Error:", err);
+    });
+    console.log(result);
+    res.status(200).json({ files: result });
+  })();
 });
 
 router.post("/upload", upload.single("uploaded_file"), (req, res) => {
