@@ -79,6 +79,54 @@ router.get("/", (req, res) => {
   // res.send('hello world');
 });
 
+router.get("/upload", (req, res) => {
+  try {
+    const path = req.query.path;
+    console.log(path);
+    const dirList = glob.sync(`${path}/`);
+    const fileList = glob.sync(`${path}`, { nodir: true });
+    let dList = [];
+    for (const i in dirList) {
+      let test = {};
+      const path = dirList[i];
+      const folder = path.split("/").reverse().slice(1).reverse().join("/");
+      const name = folder.split("/").reverse()[0];
+      test["name"] = name;
+      test["title"] = name;
+      test["path"] = folder;
+      test["folder"] = folder;
+      test["date"] = sampleDate(new Date(), "YYYY年MM月DD日");
+      test["color"] = "amber";
+      test["icon"] = "mdi-folder";
+      dList.push(test);
+    }
+    let fList = [];
+    for (const i in fileList) {
+      let test = {};
+      const path = fileList[i];
+      const folder = path.split("/").reverse().slice(1).reverse().join("/");
+      const filename = path.split("/").reverse()[0].split(".")[0];
+      const extend = path.split("/").reverse()[0].split(".")[1];
+      const name = [filename, extend].join(".");
+      test["name"] = name;
+      test["title"] = name;
+      test["path"] = path;
+      test["folder"] = folder;
+      test["filename"] = filename;
+      test["extend"] = extend;
+      test["date"] = sampleDate(new Date(), "YYYY年MM月DD日");
+      test["color"] = "amber";
+      test["icon"] = "mdi-clipboard-text";
+      fList.push(test);
+    }
+    console.log(dList, fList);
+    const result = { dirs: dList, files: fList };
+    res.status(200).json(result);
+  } catch (e) {
+    res.status(500).json(e);
+  }
+});
+
 router.get("/upload/test", (req, res) => {
   //ファイルとディレクトリのリストが格納される(配列)
   const path = req.query.path || "*";
@@ -115,76 +163,6 @@ router.get("/upload/detail", (req, res) => {
   res.status(200).json(result);
 });
 
-router.get("/upload", (req, res) => {
-  // fs.readdir(upload_dir, (err, files) => {
-  //   let fileList = [];
-  //   if (err) {
-  //     console.error(err);
-  //     return;
-  //   }
-  //   for (const file of files) {
-  //     let test = {};
-  //     const fp = path.join(upload_dir, file);
-  //     //     // fs.stat(fp, (err, stats) => {
-  //     //     //   if (err) {
-  //     //     //     console.error(err);
-  //     //     //     return;
-  //     //     //   }
-  //     //     //   if (stats.isDirectory()) {
-  //     //     //     showFiles(fp, callback);
-  //     //     //   } else {
-  //     //     //     callback(fp);
-  //     //     //   }
-  //     //     // });
-  //     test["name"] = file;
-  //     test["title"] = file;
-  //     test["subtitle"] = sampleDate(new Date(), "YYYY年MM月DD日");
-  //     test["path"] = fp;
-  //     test["color"] = "amber";
-  //     test["icon"] = "mdi-clipboard-text";
-  //     fileList.push(test);
-  //   }
-  //   const result = { files: fileList };
-  //   res.status(200).json(result);
-  // });
-
-  const dirList = glob.sync("public/**/");
-  const fileList = glob.sync("public/**", { nodir: true });
-  let dList = [];
-  for (const i in dirList) {
-    let test = {};
-    const path = dirList[i];
-    const name = path.split("/").reverse().slice(1).reverse().join("/");
-    const filename = path.split("/").reverse()[0].split(".")[0];
-    const extend = path.split("/").reverse()[0].split(".")[1];
-    test["name"] = name;
-    test["title"] = filename;
-    test["path"] = path;
-    test["date"] = sampleDate(new Date(), "YYYY年MM月DD日");
-    test["color"] = "amber";
-    test["icon"] = "mdi-folder";
-    dList.push(test);
-  }
-  let fList = [];
-  for (const i in fileList) {
-    let test = {};
-    const path = fileList[i];
-    const name = path.split("/").reverse().slice(1).reverse().join("/");
-    const filename = path.split("/").reverse()[0].split(".")[0];
-    const extend = path.split("/").reverse()[0].split(".")[1];
-    test["name"] = filename + extend;
-    test["title"] = filename + extend;
-    test["path"] = path;
-    test["date"] = sampleDate(new Date(), "YYYY年MM月DD日");
-    test["color"] = "amber";
-    test["icon"] = "mdi-clipboard-text";
-    fList.push(test);
-  }
-  console.log(dList, fList);
-  const result = { dirs: dList, files: fList };
-  res.status(200).json(result);
-});
-
 router.get("/upload/dirent", (req, res) => {
   const readdirRecursively = async (dir, files = []) => {
     const dirents = await fsPromises.readdir(dir, { withFileTypes: true });
@@ -215,6 +193,27 @@ router.get("/upload/dirent", (req, res) => {
     console.log(result);
     res.status(200).json({ files: result });
   })();
+});
+
+router.post("/download", function (req, res, next) {
+  console.log("/download");
+  const body = req.body;
+  console.log(body);
+  const path = body.path;
+  res.status(200).download(path);
+  // const file = fs.readFileSync(path);
+  // res.header("Content-Type", "application/json; charset=utf-8");
+  // res.status(200).json(infos);
+});
+router.post("/api/download", function (req, res, next) {
+  console.log("/api/download");
+  const body = req.body;
+  console.log(body);
+  const path = body.path;
+  res.status(200).download(path);
+  // const file = fs.readFileSync(path);
+  // res.header("Content-Type", "application/json; charset=utf-8");
+  // res.status(200).json(infos);
 });
 
 router.post("/upload", upload.single("uploaded_file"), (req, res) => {
