@@ -376,4 +376,9 @@ router.delete("/document", (req, res) => {
   db.deleteDocumentData(req, res);
 });
 
+router.get("/comment/:table", (req, res) => {
+  console.log("SELECT comment");
+  db.getColumnComment(req, res);
+});
+
 module.exports = router;

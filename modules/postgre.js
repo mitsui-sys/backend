@@ -25,7 +25,7 @@ const isNum = (val) => {
 
 const typeData = (data) => {
   // return typeof data === "string" ? `'${data}'` : data;
-  return !isNum(data) ? `'${data}'` : data;
+  return !isNum(data) || !data ? `'${data}'` : data;
 };
 
 /**
@@ -39,6 +39,34 @@ const joinData = (data, separator = ",") => {
     items.push(`${x}=${typeData(data[x])}`);
   }
   return items.join(separator);
+};
+
+const getColumnComment = (req, res) => {
+  const params = req.params;
+
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const tableName = params.table;
+      const sql =
+        //--指定したテーブルのカラム一覧とコメントを取得するクエリ
+        `select information_schema.columns.column_name, information_schema.columns.data_type,
+  (select description from pg_description where
+  pg_description.objoid=pg_stat_user_tables.relid and
+  pg_description.objsubid=information_schema.columns.ordinal_position
+  )
+  from
+  pg_stat_user_tables,
+  information_schema.columns
+  where pg_stat_user_tables.relname='${tableName}' and pg_stat_user_tables.relname=information_schema.columns.table_name}`;
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
 };
 
 //調査票を取得する
@@ -852,4 +880,5 @@ module.exports = {
   registerDocumentData,
   updateDocumentData,
   deleteDocumentData,
+  getColumnComment,
 };
