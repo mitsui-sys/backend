@@ -41,7 +41,7 @@ const joinData = (data, separator = ",") => {
   return items.join(separator);
 };
 
-const getColumnComment = (req, res) => {
+const getColumnComment = async (req, res) => {
   const params = req.params;
 
   try {
