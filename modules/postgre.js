@@ -41,556 +41,6 @@ const joinData = (data, separator = ",") => {
   return items.join(separator);
 };
 
-const getColumnComment = async (req, res) => {
-  const params = req.params;
-
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const tableName = params.table;
-      const sql =
-        //--指定したテーブルのカラム一覧とコメントを取得するクエリ
-        `select information_schema.columns.column_name, information_schema.columns.data_type,
-  (select description from pg_description where
-  pg_description.objoid=pg_stat_user_tables.relid and
-  pg_description.objsubid=information_schema.columns.ordinal_position
-  )
-  from
-  pg_stat_user_tables,
-  information_schema.columns
-  where pg_stat_user_tables.relname='${tableName}' and pg_stat_user_tables.relname=information_schema.columns.table_name}`;
-      const res1 = await client.query(sql); // ➀
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-//調査票を取得する
-const getDocumentData = async (req, res) => {
-  const params = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(params);
-  console.log(query);
-  console.log(body);
-
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_010_document";
-      const name = params.table === undefined ? "" : typeData(params.table);
-      const cond = name == "" ? "" : `AND name = ${name}`;
-      const sql = `SELECT * FROM ${table} WHERE 1=1 ${cond}`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const registerDocumentData = async (req, res) => {
-  let param = req.params;
-  let query = req.query;
-  let body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const data = body.data;
-
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_010_document";
-      const columns = Object.keys(data);
-      const col = "(" + columns.join(",") + ")";
-      const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
-      const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const updateDocumentData = async (req, res) => {
-  let param = req.params;
-  let query = req.query;
-  let body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_010_document";
-      const key = body.data.key;
-      const update = body.data.update;
-      const cond = joinData(key);
-      const row = joinData(update);
-      const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const deleteDocumentData = async (req, res) => {
-  let param = req.params;
-  let query = req.query;
-  let body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_010_document";
-      const key = body.data.key;
-      const cond = joinData(key, " AND ");
-      const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-//表示設定を取得する
-const getDisplay = async (req, res) => {
-  const params = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(params);
-  console.log(query);
-  console.log(body);
-
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const tableName = "tbl_009_display";
-      const name = params.table === undefined ? "" : typeData(params.table);
-      const cond = name == "" ? "" : `AND name = ${name}`;
-      const sql = `SELECT * FROM ${tableName} WHERE 1=1 ${cond}`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const registerDisplay = async (req, res) => {
-  let param = req.params;
-  let query = req.query;
-  let body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const data = body.data;
-
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_009_display";
-      const columns = Object.keys(data);
-      const col = "(" + columns.join(",") + ")";
-      const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
-      const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const updateDisplay = async (req, res) => {
-  let param = req.params;
-  let query = req.query;
-  let body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_009_display";
-      const key = body.data.key;
-      const update = body.data.update;
-      const cond = joinData(key);
-      const row = joinData(update);
-      const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const deleteDisplay = async (req, res) => {
-  let param = req.params;
-  let query = req.query;
-  let body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  try {
-    const result = await pool[1].tx(async (client) => {
-      const table = "tbl_009_display";
-      const key = body.data.key;
-      const cond = joinData(key, " AND ");
-      const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
-      console.log(sql);
-      const res1 = await client.query(sql); // ➀
-      // const res2 = await client.query("SELECT NOW()"); // ➁
-      // const res3 = await client.query("SELECT NOW()"); // ➂
-      return res1;
-    });
-    const response = getResponce(result);
-    res.status(200).json(response);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send(err);
-  }
-};
-
-const getCurrentFiles = (req, res) => {
-  const glob = require("glob");
-
-  glob("*", (err, files) => {
-    files.forEach((file) => {
-      console.log(file);
-    });
-    res.status(200);
-    res.end(files);
-  }).catch((err) => {
-    // error
-    res.status(500);
-    res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-  });
-};
-
-const getLog = (req, res) => {
-  req.params.name = "tbl_008_log";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const tblName = param.name;
-  const sql = `SELECT * FROM ${tblName}`;
-  console.log(sql);
-  pool[1]
-    .query(sql)
-    .then((result) => {
-      // success
-      let response = {};
-      // fieldsから列名, _types._types.builtinsからデータ型を得る
-      const fields = result.fields;
-      const types = result._types._types.builtins;
-      const columns = [];
-      fields.forEach((f) => {
-        const dt = Object.keys(types).reduce((r, key) => {
-          return types[key] === f.dataTypeID ? key : r;
-        }, null);
-        columns.push({ columnName: f.name, type: dt });
-      });
-      // レスポンスに列情報を設定する
-      response.columns = columns;
-      // レスポンスにサンプルデータを設定する
-      response.rows = result.rows;
-      // success
-      res.status(200).json(response);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const registerLog = (req, res) => {
-  req.params.name = "tbl_008_log";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-
-  console.log(param);
-  console.log(query);
-  console.log(body);
-
-  const name = param.name;
-  const data = body.data;
-  const columns = Object.keys(data);
-  const col = "(" + columns.join(",") + ")";
-  const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
-  let queryStr = `INSERT INTO ${name} ${col} VALUES ${row} RETURNING *`;
-  console.log(queryStr);
-  pool[1]
-    .query(queryStr)
-    // pool[0].query(queryStr, data)
-    .then((results) => {
-      res.status(201).json(results.rows);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const getFile = (req, res) => {
-  req.params.name = "tbl_007_file";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const tblName = param.name;
-  const sql = `SELECT * FROM ${tblName}`;
-  console.log(sql);
-  pool[1]
-    .query(sql)
-    .then((result) => {
-      // success
-      const response = getResponce(result);
-      res.status(200).json(response);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const registerFile = (req, res) => {
-  req.params.name = "tbl_007_file";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  const file = req.file;
-  const formData = req.FormData;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  console.log(file);
-  console.log(formData);
-
-  let name = param.name;
-  let data = body.data;
-  const columns = Object.keys(data[0]);
-  const col = "(" + columns.join(",") + ")";
-  let vals = [];
-  for (const i in data) {
-    const d = data[i];
-    const row = "(" + columns.map((x) => typeData(d[x])).join(",") + ")";
-    vals.push(row);
-  }
-  const val = vals.join(",");
-
-  let queryStr = `INSERT INTO ${name} ${col} VALUES ${val} RETURNING *`;
-  console.log(queryStr);
-  pool[1]
-    .query(queryStr)
-    // pool[0].query(queryStr, data)
-    .then((results) => {
-      res.status(201).json(results.rows);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const getUser = (req, res) => {
-  req.params.name = "tbl_001_user";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const tblName = param.name;
-  const sql = `SELECT * FROM ${tblName}`;
-  console.log(sql);
-  pool[1]
-    .query(sql)
-    .then((result) => {
-      // success
-      const response = getResponce(result);
-      res.status(200).json(response);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const registerUser = (req, res) => {
-  req.params.name = "tbl_001_user";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const name = param.name;
-  const data = body.data;
-  let columns = Object.keys(data);
-  const col = "(" + columns.join(",") + ")";
-  let vals = [];
-  for (const x in data) {
-    console.log(`${x} : ${data[x]}`);
-    vals.push(typeData(data[x]));
-  }
-  let val = "(" + vals.join(",") + ")";
-
-  const queryStr = `INSERT INTO ${name} ${col} VALUES ${val} RETURNING *`;
-  console.log(queryStr);
-  pool[1]
-    .query(queryStr)
-    // pool[0].query(queryStr, data)
-    .then((results) => {
-      res.status(201).json(results.rows);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const getSearch = (req, res) => {
-  req.params.name = "tbl_001_user";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const name = param.name;
-  const username = param.user;
-  let sql = `SELECT * FROM ${name} WHERE 1=1 `;
-  if (username) sql += ` AND user_name = '${username}'`;
-  pool[1]
-    .query(sql)
-    // pool[0].query(queryStr, data)
-    .then((result) => {
-      // success
-      const response = getResponce(result);
-      res.status(200).json(response);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const registerSearch = (req, res) => {
-  req.params.name = "tbl_001_user";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const name = param.name;
-  const data = body.data;
-  const user_name = data.user_name;
-  const search = data.search;
-
-  const queryStr = `UPDATE ${name} SET search = '${search}' WHERE user_name = '${user_name}' RETURNING *`;
-  console.log(queryStr);
-  pool[1]
-    .query(queryStr)
-    // pool[0].query(queryStr, data)
-    .then((results) => {
-      res.status(201).json(results.rows);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
-const login = (req, res) => {
-  req.params.name = "tbl_001_user";
-  const param = req.params;
-  const query = req.query;
-  const body = req.body;
-  console.log(param);
-  console.log(query);
-  console.log(body);
-  const tblName = param.name;
-  const username = query.username;
-  const password = query.password;
-
-  const sql = `SELECT * FROM ${tblName} WHERE 1=1 AND user_name = '${username}' AND password = '${password}'`;
-  console.log(sql);
-  pool[1]
-    .query(sql)
-    .then((result) => {
-      // success
-      res.status(200).json(result.rows);
-    })
-    .catch((error) => {
-      // error
-      res.status(500);
-      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
-    });
-};
-
 const init = (req, res) => {
   let param = req.params;
   let query = req.query;
@@ -853,6 +303,457 @@ const deleteOne = (req, res) => {
     });
 };
 
+//調査票を取得する
+const getDocumentData = async (req, res) => {
+  req.params.table = "tbl_010_document";
+  getSystem(req, res);
+  // const query = req.query;
+  // const body = req.body;
+  // console.log(params);
+  // console.log(query);
+  // console.log(body);
+
+  // try {
+  //   const result = await pool[1].tx(async (client) => {
+  //     const table = "tbl_010_document";
+  //     const name = params.table === undefined ? "" : typeData(params.table);
+  //     const cond = name == "" ? "" : `AND name = ${name}`;
+  //     const sql = `SELECT * FROM ${table} WHERE 1=1 ${cond}`;
+  //     console.log(sql);
+  //     const res1 = await client.query(sql); // ➀
+  //     // const res2 = await client.query("SELECT NOW()"); // ➁
+  //     // const res3 = await client.query("SELECT NOW()"); // ➂
+  //     return res1;
+  //   });
+  //   const response = getResponce(result);
+  //   res.status(200).json(response);
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).send(err);
+  // }
+};
+
+const registerDocumentData = async (req, res) => {
+  req.params.table = "tbl_010_document";
+  insertSystem(req, res);
+  // let param = req.params;
+  // let query = req.query;
+  // let body = req.body;
+  // console.log(param);
+  // console.log(query);
+  // console.log(body);
+  // const data = req.body.data;
+  // const table = req.params.table;
+  // const columns = Object.keys(data);
+  // const col = "(" + columns.join(",") + ")";
+  // const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+  // const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+  // console.log(sql);
+  // try {
+  //   const result = await pool[1].tx(async (client) => {
+  //     const res1 = await client.query(sql); // ➀
+  //     return res1;
+  //   });
+  //   const response = getResponce(result);
+  //   res.status(200).json(response);
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).send(err);
+  // }
+};
+
+const updateDocumentData = async (req, res) => {
+  req.params.table = "tbl_010_document";
+  updateSyetem(req, res);
+};
+
+const deleteDocumentData = async (req, res) => {
+  req.params.table = "tbl_010_document";
+  deleteSyetem(req, res);
+  // let param = req.params;
+  // let query = req.query;
+  // let body = req.body;
+  // console.log(param);
+  // console.log(query);
+  // console.log(body);
+  // try {
+  //   const result = await pool[1].tx(async (client) => {
+  //     const table = "tbl_010_document";
+  //     const key = body.data.key;
+  //     const cond = joinData(key, " AND ");
+  //     const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+  //     console.log(sql);
+  //     const res1 = await client.query(sql); // ➀
+  //     // const res2 = await client.query("SELECT NOW()"); // ➁
+  //     // const res3 = await client.query("SELECT NOW()"); // ➂
+  //     return res1;
+  //   });
+  //   const response = getResponce(result);
+  //   res.status(200).json(response);
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).send(err);
+  // }
+};
+
+//表示設定を取得する
+const getDisplay = async (req, res) => {
+  req.params.table = "tbl_009_display";
+  getSystem(req, res);
+  // const params = req.params;
+  // const query = req.query;
+  // const body = req.body;
+  // console.log(params);
+  // console.log(query);
+  // console.log(body);
+
+  // try {
+  //   const result = await pool[1].tx(async (client) => {
+  //     const tableName = "tbl_009_display";
+  //     const name = params.table === undefined ? "" : typeData(params.table);
+  //     const cond = name == "" ? "" : `AND name = ${name}`;
+  //     const sql = `SELECT * FROM ${tableName} WHERE 1=1 ${cond}`;
+  //     console.log(sql);
+  //     const res1 = await client.query(sql); // ➀
+  //     // const res2 = await client.query("SELECT NOW()"); // ➁
+  //     // const res3 = await client.query("SELECT NOW()"); // ➂
+  //     return res1;
+  //   });
+  //   const response = getResponce(result);
+  //   res.status(200).json(response);
+  // } catch (err) {
+  //   console.error(err);
+  //   res.status(500).send(err);
+  // }
+};
+
+const registerDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  const data = body.data;
+
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_009_display";
+      const columns = Object.keys(data);
+      const col = "(" + columns.join(",") + ")";
+      const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+      const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+      console.log(sql);
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const updateDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_009_display";
+      const key = body.data.key;
+      const update = body.data.update;
+      const cond = joinData(key);
+      const row = joinData(update);
+      const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
+      console.log(sql);
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const deleteDisplay = async (req, res) => {
+  let param = req.params;
+  let query = req.query;
+  let body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const table = "tbl_009_display";
+      const key = body.data.key;
+      const cond = joinData(key, " AND ");
+      const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+      console.log(sql);
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const getCurrentFiles = (req, res) => {
+  const glob = require("glob");
+
+  glob("*", (err, files) => {
+    files.forEach((file) => {
+      console.log(file);
+    });
+    res.status(200);
+    res.end(files);
+  }).catch((err) => {
+    // error
+    res.status(500);
+    res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+  });
+};
+
+const getLog = (req, res) => {
+  req.params.table = "tbl_008_log";
+  getSystem(req, res);
+  // const param = req.params;
+  // const query = req.query;
+  // const body = req.body;
+  // console.log(param);
+  // console.log(query);
+  // console.log(body);
+  // const tblName = param.name;
+  // const sql = `SELECT * FROM ${tblName}`;
+  // console.log(sql);
+  // pool[1]
+  //   .query(sql)
+  //   .then((result) => {
+  //     // success
+  //     let response = {};
+  //     // fieldsから列名, _types._types.builtinsからデータ型を得る
+  //     const fields = result.fields;
+  //     const types = result._types._types.builtins;
+  //     const columns = [];
+  //     fields.forEach((f) => {
+  //       const dt = Object.keys(types).reduce((r, key) => {
+  //         return types[key] === f.dataTypeID ? key : r;
+  //       }, null);
+  //       columns.push({ columnName: f.name, type: dt });
+  //     });
+  //     // レスポンスに列情報を設定する
+  //     response.columns = columns;
+  //     // レスポンスにサンプルデータを設定する
+  //     response.rows = result.rows;
+  //     // success
+  //     res.status(200).json(response);
+  //   })
+  //   .catch((error) => {
+  //     // error
+  //     res.status(500);
+  //     res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+  //   });
+};
+
+const registerLog = (req, res) => {
+  req.params.name = "tbl_008_log";
+  const param = req.params;
+  const query = req.query;
+  const body = req.body;
+
+  console.log(param);
+  console.log(query);
+  console.log(body);
+
+  const name = param.name;
+  const data = body.data;
+  const columns = Object.keys(data);
+  const col = "(" + columns.join(",") + ")";
+  const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+  let queryStr = `INSERT INTO ${name} ${col} VALUES ${row} RETURNING *`;
+  console.log(queryStr);
+  pool[1]
+    .query(queryStr)
+    // pool[0].query(queryStr, data)
+    .then((results) => {
+      res.status(201).json(results.rows);
+    })
+    .catch((error) => {
+      // error
+      res.status(500);
+      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+    });
+};
+
+const registerUser = (req, res) => {
+  req.params.name = "tbl_001_user";
+  const param = req.params;
+  const query = req.query;
+  const body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  const name = param.name;
+  const data = body.data;
+  let columns = Object.keys(data);
+  const col = "(" + columns.join(",") + ")";
+  let vals = [];
+  for (const x in data) {
+    console.log(`${x} : ${data[x]}`);
+    vals.push(typeData(data[x]));
+  }
+  let val = "(" + vals.join(",") + ")";
+
+  const queryStr = `INSERT INTO ${name} ${col} VALUES ${val} RETURNING *`;
+  console.log(queryStr);
+  pool[1]
+    .query(queryStr)
+    // pool[0].query(queryStr, data)
+    .then((results) => {
+      res.status(201).json(results.rows);
+    })
+    .catch((error) => {
+      // error
+      res.status(500);
+      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+    });
+};
+
+const registerSearch = (req, res) => {
+  req.params.name = "tbl_001_user";
+  const param = req.params;
+  const query = req.query;
+  const body = req.body;
+  console.log(param);
+  console.log(query);
+  console.log(body);
+  const name = param.name;
+  const data = body.data;
+  const user_name = data.user_name;
+  const search = data.search;
+
+  const queryStr = `UPDATE ${name} SET search = '${search}' WHERE user_name = '${user_name}' RETURNING *`;
+  console.log(queryStr);
+  pool[1]
+    .query(queryStr)
+    // pool[0].query(queryStr, data)
+    .then((results) => {
+      res.status(201).json(results.rows);
+    })
+    .catch((error) => {
+      // error
+      res.status(500);
+      res.end(`Error accessing DB: ${JSON.stringify(error)}`);
+    });
+};
+
+const login = (req, res) => {
+  req.params.table = "tbl_001_user";
+  getSystem(req, res);
+};
+
+const getUser = (req, res) => {
+  req.params.table = "tbl_001_user";
+  getSystem(req, res);
+};
+
+const getSystem = async function (req, res) {
+  try {
+    const table = req.params.table;
+    const key = req.query;
+    const size = Object.keys(key).length;
+    const join = joinData(key, " AND ");
+    const cond = size > 0 ? `WHERE ${join}` : "";
+    const sql = `SELECT * FROM ${table} ${cond}`;
+    console.log(sql);
+    const result = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+const insertSystem = async function (req, res) {
+  try {
+    const data = req.body.data;
+    const table = req.params.table;
+    const columns = Object.keys(data);
+    const col = "(" + columns.join(",") + ")";
+    const row = "(" + columns.map((x) => typeData(data[x])).join(",") + ")";
+    const sql = `INSERT INTO ${table} ${col} VALUES ${row} RETURNING *`;
+    console.log(sql);
+    const result = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const updateSyetem = async function (req, res) {
+  try {
+    const table = req.params.table;
+    const key = body.data.key;
+    const update = body.data.update;
+    const cond = joinData(key);
+    const row = joinData(update);
+    const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
+    console.log(sql);
+    const result = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const deleteSyetem = async function (req, res) {
+  try {
+    console.log(req.body);
+    const table = req.params.table;
+    const key = req.query;
+    const cond = joinData(key, " AND ");
+    const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+    console.log(sql);
+    const result = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
 module.exports = {
   init,
   getTables,
@@ -863,12 +764,9 @@ module.exports = {
   deleteOne,
   getColumns,
   login,
-  getSearch,
-  registerSearch,
   getUser,
+  registerSearch,
   registerUser,
-  getFile,
-  registerFile,
   getCurrentFiles,
   getLog,
   registerLog,
@@ -880,5 +778,5 @@ module.exports = {
   registerDocumentData,
   updateDocumentData,
   deleteDocumentData,
-  getColumnComment,
+  getSystem,
 };

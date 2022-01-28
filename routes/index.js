@@ -281,11 +281,6 @@ router.get("/system/user", (req, res) => {
   db.getUser(req, res);
 });
 
-router.get("/system/user/search/:user", (req, res) => {
-  console.log("get user");
-  db.getUser(req, res);
-});
-
 router.get("/system/user/login", (req, res) => {
   console.log("login");
   db.login(req, res);
@@ -301,25 +296,9 @@ router.post("/system/search/register", (req, res) => {
   db.registerSearch(req, res);
 });
 
-router.get("/system/search/:user", (req, res) => {
-  console.log("Get Search List");
-  db.getSearch(req, res);
-});
-
 router.get("/system/file", (req, res) => {
   console.log("Get File List");
   db.getFile(req.res);
-});
-
-router.post("/system/file/register", (req, res) => {
-  console.log("Register File");
-  console.log(req);
-  db.registerFile(req, res);
-});
-
-router.get("/system/current", (req, res) => {
-  console.log("Current File");
-  db.getCurrentFiles(req, res);
 });
 
 router.get("/system/log", (req, res) => {
@@ -381,4 +360,8 @@ router.get("/comment/:table", (req, res) => {
   db.getColumnComment(req, res);
 });
 
+router.get("/test/:table", (req, res) => {
+  console.log("get system data");
+  db.getSystem(req, res);
+});
 module.exports = router;
