@@ -246,32 +246,19 @@ router.get("/db", (req, res) => {
   console.log("SELECT");
   db.get(req, res);
 });
-router.get("/db/:name", (req, res) => {
+router.get("/db/:table", (req, res) => {
   console.log("SELECT ID");
   db.get(req, res);
 });
-
-router.post("/db", (req, res) => {
+router.post("/db/:table", (req, res) => {
   console.log("INSERT");
   db.insertOne(req, res);
 });
-router.post("/db/:name", (req, res) => {
-  console.log("INSERT");
-  db.insertOne(req, res);
-});
-router.put("/db", (req, res) => {
+router.put("/db/:table", (req, res) => {
   console.log("UPDATE");
   db.updateOne(req, res);
 });
-router.put("/db/:name", (req, res) => {
-  console.log("UPDATE");
-  db.updateOne(req, res);
-});
-router.delete("/db", (req, res) => {
-  console.log("DELETE");
-  db.deleteOne(req, res);
-});
-router.delete("/db/:name", (req, res) => {
+router.delete("/db/:table", (req, res) => {
   console.log("DELETE");
   db.deleteOne(req, res);
 });
@@ -364,4 +351,9 @@ router.get("/test/:table", (req, res) => {
   console.log("get system data");
   db.getSystem(req, res);
 });
+
+router.get("/api/system/user/login", (req, res) => {
+  console.log("confirm API");
+});
+
 module.exports = router;
