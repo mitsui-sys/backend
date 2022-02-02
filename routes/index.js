@@ -119,7 +119,6 @@ router.get("/upload", (req, res) => {
       test["icon"] = "mdi-clipboard-text";
       fList.push(test);
     }
-    console.log(dList, fList);
     const result = { dirs: dList, files: fList };
     res.status(200).json(result);
   } catch (e) {
@@ -139,7 +138,7 @@ router.get("/upload/test", (req, res) => {
 
 router.get("/upload/directory", (req, res) => {
   //ファイルとディレクトリのリストが格納される(配列)
-  const dirList = glob.sync("public/**/");
+  const dirList = glob.sync("付属図書/**/");
   const result = {
     data: { dir: dirList },
   };
@@ -147,7 +146,7 @@ router.get("/upload/directory", (req, res) => {
 });
 
 router.get("/upload/file", (req, res) => {
-  const fileList = glob.sync("public/**", { nodir: true });
+  const fileList = glob.sync("付属図書/**", { nodir: true });
   const result = {
     data: { file: fileList },
   };
@@ -208,7 +207,6 @@ router.post("/download", function (req, res, next) {
 router.post("/api/download", function (req, res, next) {
   console.log("/api/download");
   const body = req.body;
-  console.log(body);
   const path = body.path;
   res.status(200).download(path);
   // const file = fs.readFileSync(path);
@@ -244,43 +242,53 @@ router.get("/columns/:name", (req, res) => {
 
 router.get("/db", (req, res) => {
   console.log("SELECT");
-  db.get(req, res);
+  db.selectDatabase(req, res);
 });
 router.get("/db/:table", (req, res) => {
   console.log("SELECT ID");
-  db.get(req, res);
+  db.selectDatabase(req, res);
 });
 router.post("/db/:table", (req, res) => {
   console.log("INSERT");
-  db.insertOne(req, res);
+  db.insertDatabase(req, res);
 });
 router.put("/db/:table", (req, res) => {
   console.log("UPDATE");
-  db.updateOne(req, res);
+  db.updateDatabase(req, res);
 });
 router.delete("/db/:table", (req, res) => {
   console.log("DELETE");
-  db.deleteOne(req, res);
+  db.deleteDatabase(req, res);
 });
 
 router.get("/system/user", (req, res) => {
   console.log("get user");
-  db.getUser(req, res);
+  req.params.table = "tbl_001_user";
+  db.selectSystem(req, res);
+});
+
+router.post("/system/user", (req, res) => {
+  console.log("register user");
+  req.params.table = "tbl_001_user";
+  db.insertSystem(req, res);
+});
+
+router.put("/system/user", (req, res) => {
+  console.log("get user");
+  req.params.table = "tbl_001_user";
+  db.updateSystem(req, res);
+});
+
+router.delete("/system/user", (req, res) => {
+  console.log("delete user");
+  req.params.table = "tbl_001_user";
+  db.deleteSystem(req, res);
 });
 
 router.get("/system/user/login", (req, res) => {
-  console.log("login");
-  db.login(req, res);
-});
-
-router.post("/system/user/register", (req, res) => {
-  console.log("Register User ");
-  db.registerUser(req, res);
-});
-
-router.post("/system/search/register", (req, res) => {
-  console.log("Register Search");
-  db.registerSearch(req, res);
+  console.log("get user");
+  req.params.table = "tbl_001_user";
+  db.selectSystem(req, res);
 });
 
 router.get("/system/file", (req, res) => {
@@ -289,59 +297,83 @@ router.get("/system/file", (req, res) => {
 });
 
 router.get("/system/log", (req, res) => {
-  console.log("Get File");
-  db.getLog(req, res);
+  req.params.table = "tbl_008_log";
+  db.selectSystem(req, res);
 });
 
 router.post("/system/log/register", (req, res) => {
-  console.log("Register Log");
-  db.registerLog(req, res);
+  req.params.table = "tbl_008_log";
+  db.insertSystem(req, res);
 });
 
 //表示情報の設定
 router.get("/display", (req, res) => {
   console.log("SELECT display");
-  db.getDisplay(req, res);
+  req.params.table = "tbl_009_display";
+  db.selectSystem(req, res);
 });
 router.get("/display/:table", (req, res) => {
   console.log("SELECT display");
-  db.getDisplay(req, res);
+  req.params.table = "tbl_009_display";
+  db.selectSystem(req, res);
 });
 router.post("/display", (req, res) => {
   console.log("INSERT DISPLAY");
-  db.registerDisplay(req, res);
+  req.params.table = "tbl_009_display";
+  db.insertSystem(req, res);
 });
 router.put("/display", (req, res) => {
   console.log("UPDATE DISPLAY");
-  db.updateDisplay(req, res);
+  req.params.table = "tbl_009_display";
+  db.updateSystem(req, res);
 });
 router.delete("/display", (req, res) => {
   console.log("DELETE DISPLAY");
-  db.deleteDisplay(req, res);
+  req.params.table = "tbl_009_display";
+  db.deleteSystem(req, res);
 });
 
 //表示情報の設定
 router.get("/document", (req, res) => {
   console.log("SELECT display");
-  db.getDocumentData(req, res);
+  req.params.table = "tbl_010_document";
+  db.selectSystem(req, res);
 });
 router.get("/document/:table", (req, res) => {
   console.log("SELECT display");
-  db.getDocumentData(req, res);
+  req.params.table = "tbl_010_document";
+  db.selectSystem(req, res);
 });
 router.post("/document", (req, res) => {
   console.log("INSERT DISPLAY");
-  db.registerDocumentData(req, res);
+  req.params.table = "tbl_010_document";
+  db.insertSystem(req, res);
 });
 router.put("/document", (req, res) => {
   console.log("UPDATE DISPLAY");
-  db.updateDocumentData(req, res);
+  req.params.table = "tbl_010_document";
+  db.updateSyetem(req, res);
 });
 router.delete("/document", (req, res) => {
   console.log("DELETE DISPLAY");
-  db.deleteDocumentData(req, res);
+  req.params.table = "tbl_010_document";
+  db.deleteSystem(req, res);
 });
 
+//置換用データ
+router.get("/system/replace", (req, res) => {
+  console.log("SELECT display");
+  req.params.table = "tbl_011_replace";
+  db.selectSystem(req, res);
+});
+
+router.get("/replace", (req, res) => {
+  console.log("SELECT display");
+  req.params.table = "tbl_011_replace";
+  db.selectSystem(req, res);
+});
+
+//確認用コマンド
 router.get("/comment/:table", (req, res) => {
   console.log("SELECT comment");
   db.getColumnComment(req, res);
@@ -349,7 +381,7 @@ router.get("/comment/:table", (req, res) => {
 
 router.get("/test/:table", (req, res) => {
   console.log("get system data");
-  db.getSystem(req, res);
+  db.selectSystem(req, res);
 });
 
 router.get("/api/system/user/login", (req, res) => {

@@ -166,64 +166,6 @@ const getColumns = (req, res) => {
     });
 };
 
-const get = (req, res) => {
-  getDatabase(req, res);
-};
-
-const insertOne = (req, res) => {
-  insertDatabase(req, res);
-};
-
-const updateOne = (req, res) => {
-  updateDatabase(req, res);
-};
-
-const deleteOne = (req, res) => {
-  deleteDatabase(req, res);
-};
-
-//調査票を取得する
-const getDocumentData = async (req, res) => {
-  req.params.table = "tbl_010_document";
-  getSystem(req, res);
-};
-
-const registerDocumentData = async (req, res) => {
-  req.params.table = "tbl_010_document";
-  insertSystem(req, res);
-};
-
-const updateDocumentData = async (req, res) => {
-  req.params.table = "tbl_010_document";
-  updateSyetem(req, res);
-};
-
-const deleteDocumentData = async (req, res) => {
-  req.params.table = "tbl_010_document";
-  deleteSyetem(req, res);
-};
-
-//表示設定を取得する
-const getDisplay = async (req, res) => {
-  req.params.table = "tbl_009_display";
-  getSystem(req, res);
-};
-
-const registerDisplay = async (req, res) => {
-  req.params.table = "tbl_009_display";
-  insertSystem(req, res);
-};
-
-const updateDisplay = async (req, res) => {
-  req.params.table = "tbl_009_display";
-  updateDisplay(req, res);
-};
-
-const deleteDisplay = async (req, res) => {
-  req.params.table = "tbl_009_display";
-  deleteDisplay(req, res);
-};
-
 const getCurrentFiles = (req, res) => {
   const glob = require("glob");
 
@@ -238,21 +180,6 @@ const getCurrentFiles = (req, res) => {
     res.status(500);
     res.end(`Error accessing DB: ${JSON.stringify(error)}`);
   });
-};
-
-const getLog = (req, res) => {
-  req.params.table = "tbl_008_log";
-  getSystem(req, res);
-};
-
-const registerLog = (req, res) => {
-  req.params.table = "tbl_008_log";
-  insertSystem(req, res);
-};
-
-const registerUser = (req, res) => {
-  req.params.table = "tbl_001_user";
-  insertSystem(req, res);
 };
 
 const registerSearch = (req, res) => {
@@ -283,17 +210,7 @@ const registerSearch = (req, res) => {
     });
 };
 
-const login = (req, res) => {
-  req.params.table = "tbl_001_user";
-  getSystem(req, res);
-};
-
-const getUser = (req, res) => {
-  req.params.table = "tbl_001_user";
-  getSystem(req, res);
-};
-
-const getDatabase = async function (req, res) {
+const selectDatabase = async function (req, res) {
   try {
     const table = req.params.table;
     const key = req.query;
@@ -375,7 +292,7 @@ const deleteDatabase = async function (req, res) {
   }
 };
 
-const getSystem = async function (req, res) {
+const selectSystem = async function (req, res) {
   try {
     const table = req.params.table;
     const key = req.query;
@@ -416,7 +333,7 @@ const insertSystem = async function (req, res) {
   }
 };
 
-const updateSyetem = async function (req, res) {
+const updateSystem = async function (req, res) {
   try {
     const table = req.params.table;
     const key = req.body.data.key;
@@ -437,11 +354,11 @@ const updateSyetem = async function (req, res) {
   }
 };
 
-const deleteSyetem = async function (req, res) {
+const deleteSystem = async function (req, res) {
   try {
-    console.log(req.body);
     const table = req.params.table;
     const key = req.query;
+    console.log(table, key);
     const cond = joinData(key, " AND ");
     const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
     console.log(sql);
@@ -461,25 +378,15 @@ module.exports = {
   init,
   getTables,
   createTable,
-  get,
-  insertOne,
-  updateOne,
-  deleteOne,
   getColumns,
-  login,
-  getUser,
   registerSearch,
-  registerUser,
   getCurrentFiles,
-  getLog,
-  registerLog,
-  getDisplay,
-  registerDisplay,
-  updateDisplay,
-  deleteDisplay,
-  getDocumentData,
-  registerDocumentData,
-  updateDocumentData,
-  deleteDocumentData,
-  getSystem,
+  selectDatabase,
+  insertDatabase,
+  updateDatabase,
+  deleteDatabase,
+  selectSystem,
+  insertSystem,
+  updateSystem,
+  deleteSystem,
 };
