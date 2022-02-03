@@ -352,7 +352,7 @@ router.post("/document", (req, res) => {
 router.put("/document", (req, res) => {
   console.log("UPDATE DISPLAY");
   req.params.table = "tbl_010_document";
-  db.updateSyetem(req, res);
+  db.updateSystem(req, res);
 });
 router.delete("/document", (req, res) => {
   console.log("DELETE DISPLAY");
@@ -362,13 +362,19 @@ router.delete("/document", (req, res) => {
 
 //置換用データ
 router.get("/system/replace", (req, res) => {
-  console.log("SELECT display");
+  console.log("SELECT replace");
   req.params.table = "tbl_011_replace";
   db.selectSystem(req, res);
 });
 
 router.get("/replace", (req, res) => {
-  console.log("SELECT display");
+  console.log("SELECT replace");
+  req.params.table = "tbl_011_replace";
+  db.selectSystem(req, res);
+});
+
+router.get("/replace", (req, res) => {
+  console.log("SELECT replace");
   req.params.table = "tbl_011_replace";
   db.selectSystem(req, res);
 });

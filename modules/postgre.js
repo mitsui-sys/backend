@@ -312,6 +312,7 @@ const selectSystem = async function (req, res) {
     res.status(500).send(err);
   }
 };
+
 const insertSystem = async function (req, res) {
   try {
     const data = req.body.data;
