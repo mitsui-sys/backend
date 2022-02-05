@@ -22,22 +22,8 @@ app.use(express.json());
 app.use(cookieParser());
 // app.use("/public", express.static("public"));
 console.log(path.join(__dirname, "public"));
+
 app.use("/public", express.static(path.join(__dirname, "public")));
-
-//セッション情報
-// app.use(
-//   session({
-//     secret: "secret",
-//     resave: false,
-//     saveUninitialized: false,
-//     cookie: {
-//       httpOnly: true,
-//       secure: false,
-//       maxage: 1000 * 60 * 1, //タイムアウト1分
-//     },
-//   })
-// );
-
 app.use("/", indexRouter);
 
 // catch 404 and forward to error handler
@@ -48,7 +34,7 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   res.status(500);
-  res.end("my 500 error! : " + err);
+  res.end("Server Error! : " + err);
 });
 
 io.on("connection", (socket) => {
