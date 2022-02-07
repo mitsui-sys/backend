@@ -25,7 +25,12 @@ const isNum = (val) => {
 
 const typeData = (data) => {
   // return typeof data === "string" ? `'${data}'` : data;
-  return !isNum(data) || !data ? `'${data}'` : data;
+  return !isNum(data) || !data ? `'%${data}%'` : data;
+};
+
+const opeData = (data) => {
+  // return typeof data === "string" ? `'${data}'` : data;
+  return !isNum(data) || !data ? ` LIKE ` : ` = `;
 };
 
 /**
@@ -36,7 +41,8 @@ const typeData = (data) => {
 const joinData = (data, separator = ",") => {
   let items = [];
   for (const x in data) {
-    items.push(`${x}=${typeData(data[x])}`);
+    const d = data[x];
+    items.push(`${x}${opeData(d)}${typeData(d)}`);
   }
   return items.join(separator);
 };
