@@ -23,14 +23,16 @@ const isNum = (val) => {
   return !isNaN(val);
 };
 
-const typeData = (data) => {
+const condData = (data) => {
   // return typeof data === "string" ? `'${data}'` : data;
-  return !isNum(data) || !data ? `'%${data}%'` : data;
+
+  const cond = !isNum(data) || !data ? `'%${data}%'` : data;
+  return `${cond}`;
 };
 
-const opeData = (data) => {
-  // return typeof data === "string" ? `'${data}'` : data;
-  return !isNum(data) || !data ? ` LIKE ` : ` = `;
+const typeData = (data) => {
+  const cond = !isNum(data) || !data ? `'${data}'` : data;
+  return `${cond}`;
 };
 
 /**
@@ -38,11 +40,13 @@ const opeData = (data) => {
  * @param {*} data 連想配列
  * @returns 結合した値
  */
-const joinData = (data, separator = ",") => {
+const joinData = (data, isCond = true, separator = ",") => {
   let items = [];
   for (const x in data) {
     const d = data[x];
-    items.push(`${x}${opeData(d)}${typeData(d)}`);
+    const ope = !isCond ? " = " : !isNum(d) || !d ? ` LIKE ` : ` = `;
+    const cond = isCond ? condData(d) : typeData(d);
+    items.push(`${x}${ope}${cond}`);
   }
   return items.join(separator);
 };
@@ -221,7 +225,7 @@ const selectDatabase = async function (req, res) {
     const table = req.params.table;
     const key = req.query;
     const size = Object.keys(key).length;
-    const join = joinData(key, " AND ");
+    const join = joinData(key, true, " AND ");
     const cond = size > 0 ? `WHERE ${join}` : "";
     const sql = `SELECT * FROM ${table} ${cond}`;
     console.log(sql);
@@ -262,9 +266,9 @@ const updateDatabase = async function (req, res) {
     const table = req.params.table;
     const key = req.body.data.key;
     const update = req.body.data.update;
-    const cond = joinData(key);
-    const row = joinData(update);
-    const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
+    const cond = joinData(key, true);
+    const row = joinData(update, false);
+    const sql = `UPDATE ${table} SET ${row} WHERE ${cond} RETURNING *`;
     console.log(sql);
     const result = await pool[0].tx(async (client) => {
       const res1 = await client.query(sql); // ➀
@@ -283,8 +287,8 @@ const deleteDatabase = async function (req, res) {
     console.log(req.body);
     const table = req.params.table;
     const key = req.query;
-    const cond = joinData(key, " AND ");
-    const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+    const cond = joinData(key, true, " AND ");
+    const sql = `DELETE FROM ${table} WHERE ${cond} RETURNING *`;
     console.log(sql);
     const result = await pool[0].tx(async (client) => {
       const res1 = await client.query(sql); // ➀
@@ -303,7 +307,7 @@ const selectSystem = async function (req, res) {
     const table = req.params.table;
     const key = req.query;
     const size = Object.keys(key).length;
-    const join = joinData(key, " AND ");
+    const join = joinData(key, true, " AND ");
     const cond = size > 0 ? `WHERE ${join}` : "";
     const sql = `SELECT * FROM ${table} ${cond}`;
     console.log(sql);
@@ -345,9 +349,9 @@ const updateSystem = async function (req, res) {
     const table = req.params.table;
     const key = req.body.data.key;
     const update = req.body.data.update;
-    const cond = joinData(key);
-    const row = joinData(update);
-    const sql = `UPDATE ${table} SET ${row} WHERE 1=1 AND ${cond} RETURNING *`;
+    const cond = joinData(key, true);
+    const row = joinData(update, false);
+    const sql = `UPDATE ${table} SET ${row} WHERE ${cond} RETURNING *`;
     console.log(sql);
     const result = await pool[1].tx(async (client) => {
       const res1 = await client.query(sql); // ➀
@@ -366,8 +370,8 @@ const deleteSystem = async function (req, res) {
     const table = req.params.table;
     const key = req.query;
     console.log(table, key);
-    const cond = joinData(key, " AND ");
-    const sql = `DELETE FROM ${table} WHERE 1=1 AND ${cond} RETURNING *`;
+    const cond = joinData(key, true, " AND ");
+    const sql = `DELETE FROM ${table} WHERE ${cond} RETURNING *`;
     console.log(sql);
     const result = await pool[1].tx(async (client) => {
       const res1 = await client.query(sql); // ➀
