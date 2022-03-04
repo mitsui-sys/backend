@@ -44,8 +44,22 @@ const joinData = (data, isCond = true, separator = ",") => {
   let items = [];
   for (const x in data) {
     const d = data[x];
-    const ope = !isCond ? " = " : !isNum(d) || !d ? ` LIKE ` : ` = `;
-    const cond = isCond ? condData(d) : typeData(d);
+    const ope = "="; //!isCond ? " = " : !isNum(d) || !d ? ` LIKE ` : ` = `;
+    const cond = typeData(d); //isCond ? condData(d) : typeData(d);
+    items.push(`${x}${ope}${cond}`);
+  }
+  return items.join(separator);
+};
+
+const joinDataType = (data, isCond = true, separator = ",") => {
+  let items = [];
+  for (const x in data) {
+    //データ例 番号:文字列
+    const d = data[x];
+    const splited = d.split(":");
+    const ope = splited[1] != "number" ? ` LIKE ` : ` = `;
+    // const ope = !isCond ? " = " : !isNum(d) || !d ? ` LIKE ` : ` = `;
+    const cond = splited[1] != "number" ? `'%${splited[0]}%'` : `${splited[0]}`;
     items.push(`${x}${ope}${cond}`);
   }
   return items.join(separator);
@@ -100,6 +114,27 @@ const getTables = async (req, res) => {
         "SELECT tablename FROM pg_tables " +
         "WHERE schemaname NOT IN('pg_catalog','information_schema') " +
         "ORDER BY tablename";
+      const res1 = await client.query(sql); // ➀
+      // const res2 = await client.query("SELECT NOW()"); // ➁
+      // const res3 = await client.query("SELECT NOW()"); // ➂
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const getCityisdb = async (req, res) => {
+  try {
+    const result = await pool[1].tx(async (client) => {
+      const sql =
+        "SELECT tablename FROM pg_tables " +
+        "WHERE schemaname NOT IN('pg_catalog','information_schema') " +
+        "ORDER BY tablename";
+
       const res1 = await client.query(sql); // ➀
       // const res2 = await client.query("SELECT NOW()"); // ➁
       // const res3 = await client.query("SELECT NOW()"); // ➂
@@ -225,7 +260,7 @@ const selectDatabase = async function (req, res) {
     const table = req.params.table;
     const key = req.query;
     const size = Object.keys(key).length;
-    const join = joinData(key, true, " AND ");
+    const join = joinDataType(key, true, " AND ");
     const cond = size > 0 ? `WHERE ${join}` : "";
     const sql = `SELECT * FROM ${table} ${cond}`;
     console.log(sql);
@@ -289,6 +324,27 @@ const deleteDatabase = async function (req, res) {
     const key = req.query;
     const cond = joinData(key, true, " AND ");
     const sql = `DELETE FROM ${table} WHERE ${cond} RETURNING *`;
+    console.log(sql);
+    const result = await pool[0].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const selectDatabaseDetail = async function (req, res) {
+  try {
+    const table = req.params.table;
+    const key = req.query;
+    const size = Object.keys(key).length;
+    const join = joinData(key, true, " AND ");
+    const cond = size > 0 ? `WHERE ${join}` : "";
+    const sql = `SELECT * FROM ${table} ${cond}`;
     console.log(sql);
     const result = await pool[0].tx(async (client) => {
       const res1 = await client.query(sql); // ➀
@@ -388,6 +444,7 @@ const deleteSystem = async function (req, res) {
 module.exports = {
   init,
   getTables,
+  getCityisdb,
   createTable,
   getColumns,
   registerSearch,
@@ -396,6 +453,7 @@ module.exports = {
   insertDatabase,
   updateDatabase,
   deleteDatabase,
+  selectDatabaseDetail, //完全一致検索
   selectSystem,
   insertSystem,
   updateSystem,

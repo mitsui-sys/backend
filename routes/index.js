@@ -261,24 +261,36 @@ router.delete("/db/:table", (req, res) => {
   db.deleteDatabase(req, res);
 });
 
+//詳細画面表示
+router.get("/detail/:table", (req, res) => {
+  console.log("SELECT ID");
+  db.selectDatabaseDetail(req, res);
+});
+
+//システム情報DBのテーブル一覧を取得
+router.get("/system", (req, res) => {
+  db.getCityisdb(req, res);
+});
+
+//ユーザー情報を取得
 router.get("/system/user", (req, res) => {
   console.log("get user");
   req.params.table = "tbl_001_user";
   db.selectSystem(req, res);
 });
-
+//ユーザー情報を登録
 router.post("/system/user", (req, res) => {
   console.log("register user");
   req.params.table = "tbl_001_user";
   db.insertSystem(req, res);
 });
-
+//ユーザー情報を更新
 router.put("/system/user", (req, res) => {
   console.log("get user");
   req.params.table = "tbl_001_user";
   db.updateSystem(req, res);
 });
-
+//ユーザー情報を削除
 router.delete("/system/user", (req, res) => {
   console.log("delete user");
   req.params.table = "tbl_001_user";
