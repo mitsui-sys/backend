@@ -303,6 +303,13 @@ router.get("/system/user/login", (req, res) => {
   db.selectSystem(req, res);
 });
 
+//ユーザーが存在するか
+router.put("/system/user/check", (req, res) => {
+  console.log("get user");
+  req.params.table = "tbl_001_user";
+  db.checkUser(req, res);
+});
+
 router.get("/system/file", (req, res) => {
   console.log("Get File List");
   db.getFile(req.res);

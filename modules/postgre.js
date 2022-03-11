@@ -1,3 +1,5 @@
+const { exists } = require("fs");
+const { exit } = require("process");
 const { pool, dbConf, initilize } = require("./db.index"); //DB設定
 
 const getResponce = (result) => {
@@ -255,6 +257,7 @@ const registerSearch = (req, res) => {
     });
 };
 
+//データベースkc28382_bunkazaiにおける操作
 const selectDatabase = async function (req, res) {
   try {
     const table = req.params.table;
@@ -295,7 +298,6 @@ const insertDatabase = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
 const updateDatabase = async function (req, res) {
   try {
     const table = req.params.table;
@@ -316,7 +318,6 @@ const updateDatabase = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
 const deleteDatabase = async function (req, res) {
   try {
     console.log(req.body);
@@ -336,7 +337,6 @@ const deleteDatabase = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
 const selectDatabaseDetail = async function (req, res) {
   try {
     const table = req.params.table;
@@ -357,7 +357,7 @@ const selectDatabaseDetail = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
+//データベースkc28382_isk_cityisdbにおける操作
 const selectSystem = async function (req, res) {
   try {
     const table = req.params.table;
@@ -378,7 +378,6 @@ const selectSystem = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
 const insertSystem = async function (req, res) {
   try {
     const data = req.body.data;
@@ -399,7 +398,6 @@ const insertSystem = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
 const updateSystem = async function (req, res) {
   try {
     const table = req.params.table;
@@ -420,7 +418,6 @@ const updateSystem = async function (req, res) {
     res.status(500).send(err);
   }
 };
-
 const deleteSystem = async function (req, res) {
   try {
     const table = req.params.table;
@@ -435,6 +432,46 @@ const deleteSystem = async function (req, res) {
     });
     const response = getResponce(result);
     res.status(200).json(response);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+const checkUser = async function (req, res) {
+  try {
+    const table = req.params.table;
+    const data = req.body.data;
+    const user = data.user;
+    const password = data.password;
+    const new_password = data.new_password;
+    console.log(user, password, new_password);
+    if (!user || !password || !new_password) {
+      res.status(300).send("値が未入力です。");
+      return;
+    }
+    const sql = `SELECT * FROM ${table} WHERE user_name = '${user}'`;
+    console.log(sql);
+    const result = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    const rows = response.rows;
+    if (rows.length <= 0) {
+      res.status(300).json("ユーザーなし");
+      return;
+    }
+
+    const sql1 = `UPDATE ${table} SET password = '${new_password}', update = '${new Date().toLocaleString(
+      { timeZone: "Asia/Tokyo" }
+    )}' WHERE user_name = '${user}' AND password = '${password}' RETURNING *`;
+    console.log(sql1);
+    const result1 = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql1); // ➀
+      return res1;
+    });
+    const response1 = getResponce(result1);
+    res.status(200).json(response1);
   } catch (err) {
     console.error(err);
     res.status(500).send(err);
@@ -458,4 +495,5 @@ module.exports = {
   insertSystem,
   updateSystem,
   deleteSystem,
+  checkUser,
 };

@@ -1,27 +1,27 @@
 exports.dbConf = [
   {
-    host: "localhost",
+    host: "LG2201001",
     database: "kc28382_bunkazai",
     port: 5432,
     user: "postgres",
     password: "Kanko@1128",
   },
   {
-    host: "localhost",
+    host: "LG2201001",
     database: "kc28382_isk_cityisdb",
     port: 5432,
     user: "postgres",
     password: "Kanko@1128",
   },
   {
-    host: "LG2201001",
+    host: "localhost",
     database: "kc28382_bunkazai",
     port: 5432,
     user: "postgres",
     password: "Kanko@1128",
   },
   {
-    host: "LG2201001",
+    host: "localhost",
     database: "kc28382_isk_cityisdb",
     port: 5432,
     user: "postgres",
