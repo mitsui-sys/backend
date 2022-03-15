@@ -409,8 +409,9 @@ router.get("/test/:table", (req, res) => {
   db.selectSystem(req, res);
 });
 
-router.get("/api/system/user/login", (req, res) => {
-  console.log("confirm API");
+router.get("/sql", (req, res) => {
+  console.log("execute SQL");
+  db.exceuteSQL(req, res);
 });
 
 module.exports = router;

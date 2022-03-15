@@ -455,8 +455,7 @@ const checkUser = async function (req, res) {
       const res1 = await client.query(sql); // ➀
       return res1;
     });
-    const response = getResponce(result);
-    const rows = response.rows;
+    const rows = result.rows;
     if (rows.length <= 0) {
       res.status(300).json("ユーザーなし");
       return;
@@ -472,6 +471,22 @@ const checkUser = async function (req, res) {
     });
     const response1 = getResponce(result1);
     res.status(200).json(response1);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(err);
+  }
+};
+
+const exceuteSQL = async function (req, res) {
+  try {
+    const sql = req.sql;
+    console.log(sql);
+    const result = await pool[1].tx(async (client) => {
+      const res1 = await client.query(sql); // ➀
+      return res1;
+    });
+    const response = getResponce(result);
+    res.status(200).json(response);
   } catch (err) {
     console.error(err);
     res.status(500).send(err);
@@ -496,4 +511,5 @@ module.exports = {
   updateSystem,
   deleteSystem,
   checkUser,
+  exceuteSQL,
 };
